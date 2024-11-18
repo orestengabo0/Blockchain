@@ -18,9 +18,6 @@ public class Blockchain {
     public boolean validateBlock(){
         Block genesisBlock = chain.get(0);
         if(!genesisBlock.getHash().equals(genesisBlock.calculateHash())){
-            System.out.println("Genesis block: ");
-            System.out.println("Expected hash: " + genesisBlock.calculateHash());
-            System.out.println("Actual hash: "+ genesisBlock.getHash());
             return false;
         }
         for(int i=1; i<chain.size(); i++){
