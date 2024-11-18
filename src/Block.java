@@ -12,9 +12,10 @@ public class Block {
 
     public Block(String data, String previousHash) {
         this.data = data;
-        this.hash = calculateHash();
         this.previousHash = previousHash;
         this.timestamp = System.currentTimeMillis();
+        this.nonce = 0;
+        this.hash = calculateHash();
     }
 
     public String calculateHash(){
@@ -22,29 +23,29 @@ public class Block {
         return applySha256(input);
     }
 
-    public String applySha256(String input){
-        MessageDigest digest = null;
-        byte[] bytes= null;
-        try{
-            digest = MessageDigest.getInstance("SHA-256");
-            bytes = digest.digest(input.getBytes(StandardCharsets.UTF_8));
-        }catch (NoSuchAlgorithmException ex){
-            System.out.println(ex.getMessage());
+    public String applySha256(String input) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hashBytes = digest.digest(input.getBytes(StandardCharsets.UTF_8));
+
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hashBytes) {
+                hexString.append(String.format("%02x", b));
+            }
+            return hexString.toString();
+        } catch (NoSuchAlgorithmException ex) {
+            throw new RuntimeException("Error while generating SHA-256 hash", ex);
         }
-        StringBuffer buffer = new StringBuffer();
-        for(byte b : bytes){
-            buffer.append(String.format("%02x", b));
-        }
-        return buffer.toString();
     }
 
-    public String mineBlock(int prefix){
-        String prefixString = new String(new char[prefix]).replace('\0','0');
-        while(!hash.substring(0, prefix).equals(prefixString)){
+
+    public void mineBlock(int difficulty){
+        String target = new String(new char[difficulty]).replace('\0','0');
+        while(!hash.substring(0, difficulty).equals(target)){
             nonce++;
             hash = calculateHash();
         }
-        return hash;
+        System.out.println("Block mined! Hash: "+ hash);
     }
 
     public String getData() {
@@ -65,5 +66,16 @@ public class Block {
 
     public int getNonce() {
         return nonce;
+    }
+
+    @Override
+    public String toString() {
+        return "Block { " +
+                "data='" + data + '\'' +
+                ", previousHash='" + previousHash + '\'' +
+                ", hash='" + hash + '\'' +
+                ", nonce='"+ nonce + '\'' +
+                ", timestamp=" + timestamp +
+                " }";
     }
 }

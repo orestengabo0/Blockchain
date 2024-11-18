@@ -2,18 +2,28 @@ import java.util.ArrayList;
 
 public class Blockchain {
     private ArrayList<Block> chain;
+    private int difficulty;
 
-    public Blockchain() {
+    public Blockchain(int difficulty) {
         this.chain = new ArrayList<>();
-        chain.add(new Block("Genesis block", "0"));
+        this.difficulty = difficulty;
+        Block genesisBlock = new Block("Genesis Block","0");
+        genesisBlock.mineBlock(difficulty);
+        chain.add(genesisBlock);
     }
-    public void addBlock(String data){
-        Block previousBlock = chain.get(chain.size() - 1);
-        Block newBlock = new Block(data, previousBlock.getPreviousHash());
+    public void addBlock(Block newBlock){
+        newBlock.mineBlock(difficulty);
         chain.add(newBlock);
     }
     public boolean validateBlock(){
-        for(int i=0; i<chain.size(); i++){
+        Block genesisBlock = chain.get(0);
+        if(!genesisBlock.getHash().equals(genesisBlock.calculateHash())){
+            System.out.println("Genesis block: ");
+            System.out.println("Expected hash: " + genesisBlock.calculateHash());
+            System.out.println("Actual hash: "+ genesisBlock.getHash());
+            return false;
+        }
+        for(int i=1; i<chain.size(); i++){
             Block currentBlock = chain.get(i);
             Block previousBlock = chain.get(i-1);
             if(!currentBlock.getHash().equals(currentBlock.calculateHash()))
@@ -27,5 +37,8 @@ public class Blockchain {
         for(Block block : chain){
             System.out.println(block);
         }
+    }
+    public ArrayList<Block> getChain() {
+        return chain;
     }
 }
